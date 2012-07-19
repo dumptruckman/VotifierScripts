@@ -1,0 +1,16 @@
+name: VotifierScripts
+main: com.dumptruckman.minecraft.votifierscripts.VotifierScripts
+version: maven-version-number
+author: dumptruckman
+depend: [Votifier]
+softdepend: [Vault]
+
+commands:
+  scriptreload:
+    description: reloads script file and config
+    usage: /<command>
+    permission: votifierscripts.reload
+
+permissions:
+  votifierscripts.reload:
+    default: OP
