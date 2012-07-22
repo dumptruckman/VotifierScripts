@@ -1,0 +1,1 @@
+broadcast("Thanks for voting, %t!")

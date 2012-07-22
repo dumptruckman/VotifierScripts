@@ -31,16 +31,16 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.vexsoftware</groupId>
-            <artifactId>votifier</artifactId>
-            <version>1.8</version>
+            <groupId>com.dumptruckman.minecraft</groupId>
+            <artifactId>buscript</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>net.milkbowl.vault</groupId>
-            <artifactId>Vault</artifactId>
-            <version>1.2.16</version>
+            <groupId>com.vexsoftware</groupId>
+            <artifactId>votifier</artifactId>
+            <version>1.8</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -156,6 +156,32 @@ and adjust the build number accordingly -->
                     <enableRulesSummary>true</enableRulesSummary>
                     <configLocation>${project.basedir}/config/checks.xml</configLocation>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.dumptruckman.minecraft:buscript</include>
+                                </includes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>buscript</pattern>
+                                    <shadedPattern>com.dumptruckman.minecraft.votifierscripts.buscript</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

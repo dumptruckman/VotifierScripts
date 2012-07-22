@@ -6,11 +6,11 @@ depend: [Votifier]
 softdepend: [Vault]
 
 commands:
-  scriptreload:
-    description: reloads script file and config
-    usage: /<command>
-    permission: votifierscripts.reload
+  vstest:
+    description: Tests the primary script file
+    usage: /<command> <player>
+    permission: votifierscripts.test
 
 permissions:
-  votifierscripts.reload:
+  votifierscripts.test:
     default: OP
