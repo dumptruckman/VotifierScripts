@@ -5,7 +5,7 @@
     <artifactId>votifierscripts</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>VotifierScripts</name>
-    <description>Bukkit plugin that allows scripts to be run based on a Votifier vote</description>
+    <description>Bukkit plugin that allows javacript scripts to be run based on a Votifier vote</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.number>UNKNOWN</project.build.number>
