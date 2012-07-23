@@ -1,1 +1,2 @@
 broadcast("Thanks for voting, %t!")
+command("give dumptruckman 264 5")
