@@ -26,9 +26,15 @@ public class VotifierScripts extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        loadDefaultScriptFile();
+        getVoteScript();
         buscript = new Buscript(this);
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+            @Override
+            public void run() {
+                getScriptAPI().executeScript(getStartupScript());
+            }
+        });
     }
 
     @Override
@@ -44,7 +50,7 @@ public class VotifierScripts extends JavaPlugin implements Listener {
         return true;
     }
 
-    private File loadDefaultScriptFile() {
+    public File getVoteScript() {
         File scriptFile = new File(getDataFolder(), "vote-script.txt");
         if (!scriptFile.exists()) {
             try {
@@ -61,8 +67,25 @@ public class VotifierScripts extends JavaPlugin implements Listener {
         return scriptFile;
     }
 
+    public File getStartupScript() {
+        File scriptFile = new File(getDataFolder(), "startup-script.txt");
+        if (!scriptFile.exists()) {
+            try {
+                this.saveResource("startup-script.txt", false);
+                if (!scriptFile.exists()) {
+                    scriptFile.createNewFile();
+                }
+            } catch (IOException e) {
+                getLogger().severe("Error creating script file: " + e.getMessage());
+                getServer().getPluginManager().disablePlugin(this);
+                return null;
+            }
+        }
+        return scriptFile;
+    }
+
     public void executeVoteScript(String target, Player player) {
-        File scriptFile = loadDefaultScriptFile();
+        File scriptFile = getVoteScript();
         if (scriptFile == null) {
             return;
         }
