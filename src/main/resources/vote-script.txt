@@ -1,2 +1,2 @@
 broadcast("Thanks for voting, %t!")
-command("give dumptruckman 264 5")
+command("give %t 264 5")
