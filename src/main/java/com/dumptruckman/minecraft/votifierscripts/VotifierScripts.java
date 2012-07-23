@@ -68,4 +68,8 @@ public class VotifierScripts extends JavaPlugin implements Listener {
         }
         buscript.executeScript(scriptFile, target, player);
     }
+
+    public Buscript getScriptAPI() {
+        return buscript;
+    }
 }
