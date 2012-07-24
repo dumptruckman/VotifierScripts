@@ -16,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 
 public class VotifierScripts extends JavaPlugin implements Listener {
 
@@ -127,14 +128,31 @@ public class VotifierScripts extends JavaPlugin implements Listener {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length != 1) {
+        if (args.length < 1) {
             return false;
         }
         Player player = null;
         if (sender instanceof Player) {
             player = (Player) sender;
         }
-        executeVoteScript(args[0], player);
+        username = args[0];
+        service = getServer().getName();
+        if (args.length >= 2) {
+            service = args[1];
+        }
+        address = "localhost";
+        if (args.length >= 3) {
+            address = args[2];
+        }
+        timestamp = new Timestamp(System.currentTimeMillis()).toString();
+        if (args.length >= 4) {
+            timestamp = args[3];
+        }
+        executeVoteScript(username, player);
+        username = null;
+        service = null;
+        address = null;
+        timestamp = null;
         return true;
     }
 

@@ -8,7 +8,7 @@ softdepend: [Vault]
 commands:
   vstest:
     description: Tests the primary script file
-    usage: /<command> <player>
+    usage: /<command> <player> [service [address [timestamp]]]
     permission: votifierscripts.test
 
 permissions:
