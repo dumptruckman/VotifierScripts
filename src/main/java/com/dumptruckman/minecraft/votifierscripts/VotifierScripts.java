@@ -4,6 +4,8 @@
 package com.dumptruckman.minecraft.votifierscripts;
 
 import buscript.Buscript;
+import buscript.StringReplacer;
+import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -19,15 +21,101 @@ public class VotifierScripts extends JavaPlugin implements Listener {
 
     private Buscript buscript;
 
+    private String username = null;
+    private String service = null;
+    private String address = null;
+    private String timestamp = null;
+
     @EventHandler
     public void vote(VotifierEvent event) {
-        executeVoteScript(event.getVote().getUsername(), null);
+        Vote vote = event.getVote();
+        username = vote.getUsername();
+        service = vote.getServiceName();
+        address = vote.getAddress();
+        timestamp = vote.getTimeStamp();
+        executeVoteScript(vote.getUsername(), null);
+        username = null;
+        service = null;
+        address = null;
+        timestamp = null;
+    }
+
+    private class UsernameReplacer implements StringReplacer {
+        @Override
+        public String getRegexString() {
+            return "%username%";
+        }
+
+        @Override
+        public String getReplacement() {
+            return username;
+        }
+
+        @Override
+        public String getGlobalVarName() {
+            return "username";
+        }
+    }
+
+    private class ServiceReplacer implements StringReplacer {
+        @Override
+        public String getRegexString() {
+            return "%service%";
+        }
+
+        @Override
+        public String getReplacement() {
+            return service;
+        }
+
+        @Override
+        public String getGlobalVarName() {
+            return "service";
+        }
+    }
+
+    private class AddressReplacer implements StringReplacer {
+        @Override
+        public String getRegexString() {
+            return "%address%";
+        }
+
+        @Override
+        public String getReplacement() {
+            return address;
+        }
+
+        @Override
+        public String getGlobalVarName() {
+            return "address";
+        }
+    }
+
+    private class TimestampReplacer implements StringReplacer {
+        @Override
+        public String getRegexString() {
+            return "%timestamp%";
+        }
+
+        @Override
+        public String getReplacement() {
+            return timestamp;
+        }
+
+        @Override
+        public String getGlobalVarName() {
+            return "timestamp";
+        }
     }
 
     @Override
     public void onEnable() {
         getVoteScript();
         buscript = new Buscript(this);
+        buscript.registerStringReplacer(new UsernameReplacer());
+        buscript.registerStringReplacer(new ServiceReplacer());
+        buscript.registerStringReplacer(new AddressReplacer());
+        buscript.registerStringReplacer(new TimestampReplacer());
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
             @Override
