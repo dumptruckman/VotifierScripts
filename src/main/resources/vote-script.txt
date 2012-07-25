@@ -1,2 +1,2 @@
-broadcast("Thanks for voting, %t!")
-command("give %t 264 5")
+broadcast("Thanks for voting, %target%!")
+command("give %target% 264 5")
