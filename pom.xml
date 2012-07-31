@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.dumptruckman.minecraft</groupId>
     <artifactId>votifierscripts</artifactId>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <name>VotifierScripts</name>
     <description>Bukkit plugin that allows javacript scripts to be run based on a Votifier vote</description>
     <licenses>
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>com.dumptruckman.minecraft</groupId>
             <artifactId>buscript</artifactId>
-            <version>1.0</version>
+            <version>1.1-SNAPSHOT</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
