@@ -8,6 +8,7 @@ import buscript.StringReplacer;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -43,6 +44,10 @@ public class VotifierScripts extends JavaPlugin implements Listener {
     @EventHandler
     public void vote(VotifierEvent event) {
         Vote vote = event.getVote();
+        if (vote.getUsername().isEmpty()) {
+            getLogger().warning("Someone voted but didn't specify a username!");
+            return;
+        }
         username = vote.getUsername();
         service = vote.getServiceName();
         address = vote.getAddress();
@@ -166,6 +171,9 @@ public class VotifierScripts extends JavaPlugin implements Listener {
         Player player = null;
         if (sender instanceof Player) {
             player = (Player) sender;
+        }
+        if (args[0].isEmpty()) {
+            sender.sendMessage(ChatColor.DARK_RED + "You may not specify a blank username!");
         }
         username = args[0];
         service = getServer().getName();
