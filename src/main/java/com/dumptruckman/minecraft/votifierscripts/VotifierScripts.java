@@ -174,6 +174,7 @@ public class VotifierScripts extends JavaPlugin implements Listener {
         }
         if (args[0].isEmpty()) {
             sender.sendMessage(ChatColor.DARK_RED + "You may not specify a blank username!");
+            return false;
         }
         username = args[0];
         service = getServer().getName();
