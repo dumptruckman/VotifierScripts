@@ -7,16 +7,24 @@ import buscript.Buscript;
 import buscript.StringReplacer;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class VotifierScripts extends JavaPlugin implements Listener {
 
@@ -26,6 +34,11 @@ public class VotifierScripts extends JavaPlugin implements Listener {
     private String service = null;
     private String address = null;
     private String timestamp = null;
+
+    private File voteScriptFile = null;
+    private File startupScriptFile = null;
+    private File playerFile = null;
+    private FileConfiguration playerConfig = null;
 
     @EventHandler
     public void vote(VotifierEvent event) {
@@ -39,6 +52,23 @@ public class VotifierScripts extends JavaPlugin implements Listener {
         service = null;
         address = null;
         timestamp = null;
+    }
+
+    @EventHandler
+    public void playerJoin(PlayerJoinEvent event) {
+        String player = event.getPlayer().getName();
+        List<String> playerList = getPlayerConfig().getStringList("runWhenOnline." + player);
+        if (playerList != null && !playerList.isEmpty()) {
+            for (String script : playerList) {
+                getScriptAPI().executeScript(new File(getScriptAPI().getScriptFolder(), script), player);
+            }
+            getPlayerConfig().set("runWhenOnline." + player, null);
+            try {
+                getPlayerConfig().save(getPlayerFile());
+            } catch (IOException e) {
+                getLogger().severe("Could not save player data.  Player may receive benefits of script multiple times!  Reason: " + e.getMessage());
+            }
+        }
     }
 
     private class UsernameReplacer implements StringReplacer {
@@ -112,11 +142,13 @@ public class VotifierScripts extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         getVoteScript();
+        getPlayerConfig();
         buscript = new Buscript(this);
         buscript.registerStringReplacer(new UsernameReplacer());
         buscript.registerStringReplacer(new ServiceReplacer());
         buscript.registerStringReplacer(new AddressReplacer());
         buscript.registerStringReplacer(new TimestampReplacer());
+        buscript.addScriptMethods(new VotifierFunctions(this));
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
             @Override
@@ -157,37 +189,64 @@ public class VotifierScripts extends JavaPlugin implements Listener {
     }
 
     public File getVoteScript() {
-        File scriptFile = new File(getDataFolder(), "vote-script.txt");
-        if (!scriptFile.exists()) {
-            try {
-                this.saveResource("vote-script.txt", false);
-                if (!scriptFile.exists()) {
-                    scriptFile.createNewFile();
+        if (voteScriptFile == null) {
+            voteScriptFile = new File(getDataFolder(), "vote-script.txt");
+            if (!voteScriptFile.exists()) {
+                try {
+                    this.saveResource("vote-script.txt", false);
+                    if (!voteScriptFile.exists()) {
+                        voteScriptFile.createNewFile();
+                    }
+                } catch (IOException e) {
+                    getLogger().severe("Error creating script file: " + e.getMessage());
+                    getServer().getPluginManager().disablePlugin(this);
+                    return null;
                 }
-            } catch (IOException e) {
-                getLogger().severe("Error creating script file: " + e.getMessage());
-                getServer().getPluginManager().disablePlugin(this);
-                return null;
             }
         }
-        return scriptFile;
+        return voteScriptFile;
     }
 
     public File getStartupScript() {
-        File scriptFile = new File(getDataFolder(), "startup-script.txt");
-        if (!scriptFile.exists()) {
-            try {
-                this.saveResource("startup-script.txt", false);
-                if (!scriptFile.exists()) {
-                    scriptFile.createNewFile();
+        if (startupScriptFile == null) {
+            startupScriptFile = new File(getDataFolder(), "startup-script.txt");
+            if (!startupScriptFile.exists()) {
+                try {
+                    this.saveResource("startup-script.txt", false);
+                    if (!startupScriptFile.exists()) {
+                        startupScriptFile.createNewFile();
+                    }
+                } catch (IOException e) {
+                    getLogger().severe("Error creating script file: " + e.getMessage());
+                    getServer().getPluginManager().disablePlugin(this);
+                    return null;
                 }
-            } catch (IOException e) {
-                getLogger().severe("Error creating script file: " + e.getMessage());
-                getServer().getPluginManager().disablePlugin(this);
-                return null;
             }
         }
-        return scriptFile;
+        return startupScriptFile;
+    }
+
+    private File getPlayerFile() {
+        if (playerFile == null) {
+            playerFile = new File(getDataFolder(), "players.dat");
+            if (!playerFile.exists()) {
+                try {
+                    playerFile.createNewFile();
+                } catch (IOException e) {
+                    getLogger().severe("Error creating dat file: " + e.getMessage());
+                    getServer().getPluginManager().disablePlugin(this);
+                    return null;
+                }
+            }
+        }
+        return playerFile;
+    }
+
+    private FileConfiguration getPlayerConfig() {
+        if (playerConfig == null) {
+            playerConfig = YamlConfiguration.loadConfiguration(getPlayerFile());
+        }
+        return playerConfig;
     }
 
     public void executeVoteScript(String target, Player player) {
@@ -200,5 +259,24 @@ public class VotifierScripts extends JavaPlugin implements Listener {
 
     public Buscript getScriptAPI() {
         return buscript;
+    }
+
+    void runWhenOnline(String script, String target) {
+        OfflinePlayer player = Bukkit.getOfflinePlayer(target);
+        if (player.isOnline()) {
+            getScriptAPI().executeScript(new File(getScriptAPI().getScriptFolder(), script), target);
+        } else {
+            List<String> playerScripts = getPlayerConfig().getStringList("runWhenOnline." + target);
+            if (playerScripts == null) {
+                playerScripts = new ArrayList<String>(1);
+            }
+            playerScripts.add(script);
+            getPlayerConfig().set("runWhenOnline." + target, playerScripts);
+            try {
+                getPlayerConfig().save(getPlayerFile());
+            } catch (IOException e) {
+                getLogger().severe("Could not save player data.  Player may not receive benefits of script!  Reason: " + e.getMessage());
+            }
+        }
     }
 }
